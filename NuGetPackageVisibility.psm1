@@ -120,6 +120,55 @@ function Show-NuGetPackage {
   }
 }
 
+function Submit-Package {
+  param(
+    [Parameter(ParameterSetName="package")] $packageId,
+    [Parameter(ParameterSetName="package")] $packageVersion,
+    [Parameter(ParameterSetName="package")] $packageFile,
+    [Parameter(ParameterSetName="config")]  $packagesConfig,
+    $apiKey,
+    $galleryUrl = "https://nuget.org"
+  )
+
+  If ($apiKey -eq $null) { throw "Parameter 'apiKey' was not specified" }
+  If ($galleryUrl -eq $null) { throw "Parameter 'galleryUrl' was not specified" }
+
+  If ($PSCmdlet.ParameterSetName -match "package") {
+    If ($packageId -eq $null) { throw "Parameter 'packageId' was not specified" }
+    If ($packageVersion -eq $null) { throw "Parameter 'packageVersion' was not specified" }
+    If ($packageFile -eq $null) { throw "Parameter 'packageFile' was not specified" }
+
+    $exists = Test-Path $packageFile
+    if ($exists -eq $false)
+    {
+      throw "File not found: $packageFile"
+    }
+
+    nuget push $packageFile -source $galleryUrl -apiKey $apiKey
+    nuget delete $packageId $packageVersion -source $galleryUrl -noninteractive -apiKey $apiKey
+  }
+  ElseIf ($PSCmdlet.ParameterSetName -match "config") {
+    If ($packagesConfig -eq $null) { throw "Parameter 'packagesConfig' was not specified" }
+    If (!(Test-Path $packagesConfig)) { throw "File '$packagesConfig' was not found" }
+
+    [xml]$packages = Get-Content $packagesConfig
+
+    foreach ($package in $packages.packages.package) {
+      $path = ".\" + $package.culture + "\" + $package.id + "." + $package.version + ".nupkg"
+      $path = $path.Replace("\\", "\")
+
+      $exists = Test-Path $path
+      if ($exists -eq $false)
+      {
+        throw "File not found: $path"
+      }
+
+      nuget push $path -source $galleryUrl -apiKey $apiKey
+      nuget delete $package.id $package.version -source $galleryUrl -noninteractive -apiKey $apiKey
+    }
+  }
+}
+
 function SetVisibility {
   param(
     $action,
