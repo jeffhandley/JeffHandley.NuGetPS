@@ -144,8 +144,7 @@ function Submit-Package {
       throw "File not found: $packageFile"
     }
 
-    nuget push $packageFile -source $galleryUrl -apiKey $apiKey
-    nuget delete $packageId $packageVersion -source $galleryUrl -noninteractive -apiKey $apiKey
+    PushDelete -packageId $packageId -packageVersion $packageVersion -packageFile $packageFile -apiKey $apiKey -galleryUrl $galleryUrl
   }
   ElseIf ($PSCmdlet.ParameterSetName -match "config") {
     If ($packagesConfig -eq $null) { throw "Parameter 'packagesConfig' was not specified" }
@@ -163,10 +162,22 @@ function Submit-Package {
         throw "File not found: $path"
       }
 
-      nuget push $path -source $galleryUrl -apiKey $apiKey
-      nuget delete $package.id $package.version -source $galleryUrl -noninteractive -apiKey $apiKey
+      PushDelete -packageId $package.id -packageVersion $package.version -packageFile $path -apiKey $apiKey -galleryUrl $galleryUrl
     }
   }
+}
+
+function PushDelete {
+  param(
+    $packageId,
+    $packageVersion,
+    $packageFile,
+    $apiKey,
+    $galleryUrl
+  )
+
+  nuget push $packageFile -source $galleryUrl -apiKey $apiKey
+  nuget delete $packageId $packageVersion -source $galleryUrl -noninteractive -apiKey $apiKey
 }
 
 function SetVisibility {
