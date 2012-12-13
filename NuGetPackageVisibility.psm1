@@ -121,6 +121,26 @@ function Show-NuGetPackage {
 }
 
 function Submit-Package {
+  <#
+  .SYNOPSIS
+  Submits a NuGet package (or set of packages) to the gallery, but as hidden (unlisted).
+  .DESCRIPTION
+  Uploads the specified package (or all packages from a packages.config file) to the gallery and then immediately marks the package(s) as unlisted by running the nuget delete command.
+  .EXAMPLE
+  Submit-Package -packageId MyAwesomePackage -packageVersion 2.0.0.0 -packageFile MyAwesomePackage.2.0.0.nupkg -apiKey 00000000-0000-0000-0000-000000000000 -galleryUrl https://nuget.org
+  .EXAMPLE
+  Submit-Package -packagesConfig packages.config -apiKey 00000000-0000-0000-0000-000000000000 -galleryUrl https://nuget.org
+  .PARAMETER packageId
+  The Id of the package to hide/show
+  .PARAMETER packageVersion
+  The Version of the package to hide/show
+  .PARAMETER packageFile
+  The nupkg file to upload for the NuGet package
+  .PARAMETER packagesConfig
+  The XML config file that lists the packages to be hidden/shown
+  .PARAMETER galleryUrl
+  The NuGet gallery Url to connect to.  By default, https://nuget.org
+  #>
   param(
     [Parameter(ParameterSetName="package")] $packageId,
     [Parameter(ParameterSetName="package")] $packageVersion,
