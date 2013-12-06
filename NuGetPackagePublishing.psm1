@@ -220,10 +220,11 @@ function SetVisibility {
     throw "Invalid 'action' parameter value.  Valid values are 'hide' and 'show'."
   }
 
-  $url = "$galleryUrl/api/v2/Package/$packageId/$packageVersion`?apiKey=$apiKey"
+  $url = "$galleryUrl/api/v2/Package/$packageId/$packageVersion"
   $web = [System.Net.WebRequest]::Create($url)
 
   $web.Method = $method
+  $web.Headers.Add("X-NuGet-ApiKey", "$apiKey")
   $web.ContentLength = 0
 
   Write-Host ""
